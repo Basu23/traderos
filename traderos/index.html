@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TraderOS — AI Trading Journal</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- App Styles -->
+  <link rel="stylesheet" href="css/design-system.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/login.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/trade-form.css" />
+  <link rel="stylesheet" href="css/analytics.css" />
+</head>
+<body class="dark">
+
+  <!-- ═══════════════════════════════════════════
+       LOGIN SCREEN
+  ═══════════════════════════════════════════ -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-bg-grid"></div>
+    <div class="login-orbs">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+
+    <div class="login-card glass">
+      <div class="login-logo">
+        <div class="logo-mark">
+          <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+            <rect width="44" height="44" rx="12" fill="url(#logo-grad)"/>
+            <path d="M10 32L18 14L22 24L26 18L34 32" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="34" cy="14" r="3" fill="#00F5A0"/>
+            <defs>
+              <linearGradient id="logo-grad" x1="0" y1="0" x2="44" y2="44">
+                <stop offset="0%" stop-color="#6C63FF"/>
+                <stop offset="100%" stop-color="#00D4AA"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div>
+          <h1 class="login-title">TRADER<span class="accent">OS</span></h1>
+          <p class="login-subtitle">Trading Journal</p>
+        </div>
+      </div>
+
+      <div class="login-form">
+        <div class="input-group">
+          <label class="input-label">Passcode</label>
+          <div class="input-wrapper">
+            <i data-lucide="lock" class="input-icon"></i>
+            <input
+              type="password"
+              id="passcode-input"
+              class="passcode-input"
+              placeholder="Enter your passcode"
+              maxlength="20"
+              autocomplete="current-password"
+            />
+            <button class="toggle-visibility" id="toggle-pass" type="button">
+              <i data-lucide="eye" id="eye-icon"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="remember-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="remember-me" checked />
+            <span class="checkbox-custom"></span>
+            <span>Remember me</span>
+          </label>
+        </div>
+
+        <button class="btn-unlock" id="unlock-btn">
+          <span>Unlock</span>
+          <i data-lucide="arrow-right"></i>
+        </button>
+
+        <p class="login-error hidden" id="login-error">Incorrect passcode. Try again.</p>
+      </div>
+
+      <p class="login-hint">Default passcode: <code>trader123</code></p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       MAIN APP SHELL
+  ═══════════════════════════════════════════ -->
+  <div id="app" class="app hidden">
+
+    <div id="sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <svg width="32" height="32" viewBox="0 0 44 44" fill="none">
+            <rect width="44" height="44" rx="12" fill="url(#logo-grad-2)"/>
+            <path d="M10 32L18 14L22 24L26 18L34 32" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="34" cy="14" r="3" fill="#00F5A0"/>
+            <defs>
+              <linearGradient id="logo-grad-2" x1="0" y1="0" x2="44" y2="44">
+                <stop offset="0%" stop-color="#6C63FF"/>
+                <stop offset="100%" stop-color="#00D4AA"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <span class="sidebar-brand">TRADER<span class="accent">OS</span></span>
+        </div>
+        <button class="sidebar-toggle" id="sidebar-toggle">
+          <i data-lucide="panel-left-close"></i>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <span class="nav-label">Overview</span>
+          <a href="#" class="nav-item active" data-page="dashboard">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </a>
+          <a href="#" class="nav-item" data-page="ai-insights">
+            <i data-lucide="sparkles"></i>
+            <span>AI Insights</span>
+            <span class="nav-badge">NEW</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <span class="nav-label">Trades</span>
+          <a href="#" class="nav-item" data-page="history">
+            <i data-lucide="list"></i>
+            <span>Trade History</span>
+          </a>
+          <a href="#" class="nav-item" data-page="screenshots">
+            <i data-lucide="image"></i>
+            <span>Screenshots</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <span class="nav-label">Analysis</span>
+          <a href="#" class="nav-item" data-page="analytics">
+            <i data-lucide="bar-chart-2"></i>
+            <span>Analytics</span>
+          </a>
+          <a href="#" class="nav-item" data-page="charts">
+            <i data-lucide="trending-up"></i>
+            <span>Charts</span>
+          </a>
+          <a href="#" class="nav-item" data-page="calendar">
+            <i data-lucide="calendar"></i>
+            <span>Calendar</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <span class="nav-label">Journal</span>
+          <a href="#" class="nav-item" data-page="notes">
+            <i data-lucide="notebook-pen"></i>
+            <span>Notes</span>
+          </a>
+          <a href="#" class="nav-item" data-page="psychology">
+            <i data-lucide="brain"></i>
+            <span>Psychology</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <span class="nav-label">System</span>
+          <a href="#" class="nav-item" data-page="settings">
+            <i data-lucide="settings"></i>
+            <span>Settings</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="capital-widget">
+          <span class="cw-label">Capital</span>
+          <span class="cw-value" id="sidebar-capital">₹0</span>
+        </div>
+        <button class="btn-logout" id="logout-btn">
+          <i data-lucide="log-out"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+
+      <!-- Top Bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn" id="mobile-menu-btn">
+            <i data-lucide="menu"></i>
+          </button>
+          <div class="page-title-area">
+            <h2 class="page-title" id="page-title">Dashboard</h2>
+            <span class="page-date" id="page-date"></span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="market-status">
+            <span class="market-dot" id="market-dot"></span>
+            <span id="market-status-text">Market Closed</span>
+          </div>
+          <button class="btn-add-trade" id="add-trade-btn">
+            <i data-lucide="plus"></i>
+            <span>Add Trade</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Pages Container -->
+      <div class="pages-container">
+
+        <!-- ── DASHBOARD PAGE ── -->
+        <section id="page-dashboard" class="page active">
+
+          <!-- AI Insight Banner -->
+          <div class="ai-banner" id="ai-banner">
+            <div class="ai-banner-icon">
+              <i data-lucide="sparkles"></i>
+            </div>
+            <p class="ai-banner-text" id="ai-banner-text">Analyzing your trading patterns...</p>
+            <button class="ai-banner-refresh" id="ai-refresh-btn">
+              <i data-lucide="refresh-cw"></i>
+            </button>
+          </div>
+
+          <!-- KPI Grid -->
+          <div class="kpi-grid" id="kpi-grid">
+            <!-- Populated by JS -->
+          </div>
+
+          <!-- Charts Row -->
+          <div class="charts-row">
+            <div class="chart-card glass">
+              <div class="chart-card-header">
+                <h3>Equity Curve</h3>
+                <div class="chart-period-tabs">
+                  <button class="period-tab active" data-period="week">1W</button>
+                  <button class="period-tab" data-period="month">1M</button>
+                  <button class="period-tab" data-period="all">All</button>
+                </div>
+              </div>
+              <canvas id="equity-chart" height="200"></canvas>
+            </div>
+
+            <div class="chart-card glass chart-card-sm">
+              <div class="chart-card-header">
+                <h3>Win / Loss</h3>
+              </div>
+              <canvas id="winloss-chart" height="200"></canvas>
+            </div>
+          </div>
+
+          <!-- Strategy Performance -->
+          <div class="strategy-row">
+            <div class="chart-card glass">
+              <div class="chart-card-header">
+                <h3>Strategy Performance</h3>
+              </div>
+              <canvas id="strategy-chart" height="180"></canvas>
+            </div>
+            <div class="chart-card glass">
+              <div class="chart-card-header">
+                <h3>Daily P&L</h3>
+              </div>
+              <canvas id="daily-pnl-chart" height="180"></canvas>
+            </div>
+          </div>
+
+          <!-- Recent Trades -->
+          <div class="recent-trades-section">
+            <div class="section-header">
+              <h3>Recent Trades</h3>
+              <a href="#" class="link-btn" data-page="history">View All</a>
+            </div>
+            <div class="recent-trades-table" id="recent-trades-table">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ── TRADE HISTORY PAGE ── -->
+        <section id="page-history" class="page">
+          <div class="page-toolbar">
+            <div class="search-bar">
+              <i data-lucide="search"></i>
+              <input type="text" id="history-search" placeholder="Search trades..." />
+            </div>
+            <div class="filter-group">
+              <select id="filter-index" class="filter-select">
+                <option value="">All Indices</option>
+                <option value="NIFTY">Nifty</option>
+                <option value="BANKNIFTY">BankNifty</option>
+                <option value="SENSEX">Sensex</option>
+              </select>
+              <select id="filter-direction" class="filter-select">
+                <option value="">All Directions</option>
+                <option value="BUY CE">BUY CE</option>
+                <option value="BUY PE">BUY PE</option>
+                <option value="SELL CE">SELL CE</option>
+                <option value="SELL PE">SELL PE</option>
+              </select>
+              <select id="filter-result" class="filter-select">
+                <option value="">All Results</option>
+                <option value="win">Win</option>
+                <option value="loss">Loss</option>
+              </select>
+            </div>
+            <div class="export-group">
+              <button class="btn-ghost" id="export-csv-btn"><i data-lucide="download"></i> CSV</button>
+              <button class="btn-ghost" id="import-csv-btn"><i data-lucide="upload"></i> Import</button>
+              <input type="file" id="import-file" accept=".csv" class="hidden" />
+            </div>
+          </div>
+
+          <div class="table-container glass">
+            <table class="trades-table" id="trades-table">
+              <thead>
+                <tr>
+                  <th data-sort="date">Date <i data-lucide="chevrons-up-down"></i></th>
+                  <th>Index</th>
+                  <th>Direction</th>
+                  <th>Strategy</th>
+                  <th data-sort="entry">Entry</th>
+                  <th data-sort="exit">Exit</th>
+                  <th data-sort="net_profit">P&L</th>
+                  <th>RR</th>
+                  <th>Result</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="trades-tbody">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pagination" id="pagination">
+            <!-- Populated by JS -->
+          </div>
+        </section>
+
+        <!-- ── ANALYTICS PAGE ── -->
+        <section id="page-analytics" class="page">
+          <div class="analytics-grid" id="analytics-grid">
+            <!-- Populated by JS -->
+          </div>
+          <div class="analytics-charts-grid">
+            <div class="chart-card glass">
+              <div class="chart-card-header"><h3>Monthly P&L</h3></div>
+              <canvas id="monthly-chart" height="200"></canvas>
+            </div>
+            <div class="chart-card glass">
+              <div class="chart-card-header"><h3>Hour-wise Performance</h3></div>
+              <canvas id="hourly-chart" height="200"></canvas>
+            </div>
+            <div class="chart-card glass">
+              <div class="chart-card-header"><h3>Index Performance</h3></div>
+              <canvas id="index-chart" height="200"></canvas>
+            </div>
+            <div class="chart-card glass">
+              <div class="chart-card-header"><h3>Drawdown Curve</h3></div>
+              <canvas id="drawdown-chart" height="200"></canvas>
+            </div>
+            <div class="chart-card glass">
+              <div class="chart-card-header"><h3>Emotion Analysis</h3></div>
+              <canvas id="emotion-chart" height="200"></canvas>
+            </div>
+            <div class="chart-card glass">
+              <div class="chart-card-header"><h3>Session Performance</h3></div>
+              <canvas id="session-chart" height="200"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── CHARTS PAGE ── -->
+        <section id="page-charts" class="page">
+          <div class="charts-full-grid">
+            <div class="chart-card glass full-width">
+              <div class="chart-card-header">
+                <h3>Capital Curve</h3>
+                <div class="chart-period-tabs">
+                  <button class="period-tab active" data-chart-period="week">1W</button>
+                  <button class="period-tab" data-chart-period="month">1M</button>
+                  <button class="period-tab" data-chart-period="all">All</button>
+                </div>
+              </div>
+              <canvas id="capital-chart" height="250"></canvas>
+            </div>
+            <div class="chart-card glass">
+              <div class="chart-card-header"><h3>P&L Distribution</h3></div>
+              <canvas id="pnl-dist-chart" height="220"></canvas>
+            </div>
+            <div class="chart-card glass">
+              <div class="chart-card-header"><h3>RR Distribution</h3></div>
+              <canvas id="rr-dist-chart" height="220"></canvas>
+            </div>
+            <div class="chart-card glass">
+              <div class="chart-card-header"><h3>Holding Time Distribution</h3></div>
+              <canvas id="holding-chart" height="220"></canvas>
+            </div>
+            <div class="chart-card glass">
+              <div class="chart-card-header"><h3>Psychology Score</h3></div>
+              <canvas id="psych-chart" height="220"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── CALENDAR PAGE ── -->
+        <section id="page-calendar" class="page">
+          <div class="calendar-container glass" id="calendar-container">
+            <!-- Populated by JS -->
+          </div>
+        </section>
+
+        <!-- ── AI INSIGHTS PAGE ── -->
+        <section id="page-ai-insights" class="page">
+          <div class="ai-insights-header">
+            <div class="ai-insights-icon">
+              <i data-lucide="sparkles"></i>
+            </div>
+            <div>
+              <h2>AI Trading Insights</h2>
+              <p>Powered by Claude AI — analyzing your trading behaviour</p>
+            </div>
+            <button class="btn-primary" id="generate-insights-btn">
+              <i data-lucide="refresh-cw"></i>
+              Generate Insights
+            </button>
+          </div>
+          <div class="insights-grid" id="insights-grid">
+            <!-- Populated by JS -->
+          </div>
+        </section>
+
+        <!-- ── NOTES PAGE ── -->
+        <section id="page-notes" class="page">
+          <div class="notes-layout">
+            <div class="notes-sidebar glass">
+              <div class="notes-header">
+                <h3>Journal</h3>
+                <button class="btn-icon" id="new-note-btn"><i data-lucide="plus"></i></button>
+              </div>
+              <div class="notes-tabs">
+                <button class="notes-tab active" data-note-type="daily">Daily</button>
+                <button class="notes-tab" data-note-type="weekly">Weekly</button>
+                <button class="notes-tab" data-note-type="monthly">Monthly</button>
+              </div>
+              <div class="notes-list" id="notes-list">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+            <div class="notes-editor glass">
+              <div class="editor-toolbar" id="editor-toolbar">
+                <button class="editor-btn" data-cmd="bold"><i data-lucide="bold"></i></button>
+                <button class="editor-btn" data-cmd="italic"><i data-lucide="italic"></i></button>
+                <button class="editor-btn" data-cmd="underline"><i data-lucide="underline"></i></button>
+                <div class="toolbar-divider"></div>
+                <button class="editor-btn" data-cmd="insertUnorderedList"><i data-lucide="list"></i></button>
+                <button class="editor-btn" data-cmd="insertOrderedList"><i data-lucide="list-ordered"></i></button>
+                <div class="toolbar-divider"></div>
+                <button class="btn-sm btn-primary" id="save-note-btn">Save</button>
+              </div>
+              <input type="text" class="note-title-input" id="note-title" placeholder="Note title..." />
+              <div class="note-content" id="note-content" contenteditable="true">
+                <p>Select a note or create a new one.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── PSYCHOLOGY PAGE ── -->
+        <section id="page-psychology" class="page">
+          <div class="psych-grid" id="psych-grid">
+            <!-- Populated by JS -->
+          </div>
+        </section>
+
+        <!-- ── SCREENSHOTS PAGE ── -->
+        <section id="page-screenshots" class="page">
+          <div class="screenshots-toolbar">
+            <h3>Trade Screenshots</h3>
+            <label class="btn-primary" for="screenshot-upload">
+              <i data-lucide="upload"></i> Upload
+            </label>
+            <input type="file" id="screenshot-upload" accept="image/*" multiple class="hidden" />
+          </div>
+          <div class="screenshots-grid" id="screenshots-grid">
+            <!-- Populated by JS -->
+          </div>
+        </section>
+
+        <!-- ── SETTINGS PAGE ── -->
+        <section id="page-settings" class="page">
+          <div class="settings-grid">
+
+            <div class="settings-card glass">
+              <h3><i data-lucide="shield"></i> Security</h3>
+              <div class="settings-form">
+                <div class="input-group">
+                  <label>Current Passcode</label>
+                  <input type="password" id="current-pass" placeholder="••••••••" />
+                </div>
+                <div class="input-group">
+                  <label>New Passcode</label>
+                  <input type="password" id="new-pass" placeholder="••••••••" />
+                </div>
+                <div class="input-group">
+                  <label>Confirm New Passcode</label>
+                  <input type="password" id="confirm-pass" placeholder="••••••••" />
+                </div>
+                <button class="btn-primary" id="change-pass-btn">Update Passcode</button>
+              </div>
+            </div>
+
+            <div class="settings-card glass">
+              <h3><i data-lucide="sliders"></i> Strategies</h3>
+              <div class="settings-form">
+                <div class="input-group">
+                  <label>Strategy 1 Name</label>
+                  <input type="text" id="strat-1-name" placeholder="e.g. Gann Breakout" />
+                </div>
+                <div class="input-group">
+                  <label>Strategy 2 Name</label>
+                  <input type="text" id="strat-2-name" placeholder="e.g. Rejection Play" />
+                </div>
+                <div class="input-group">
+                  <label>Strategy 3 Name</label>
+                  <input type="text" id="strat-3-name" placeholder="e.g. Midpoint Bounce" />
+                </div>
+                <button class="btn-primary" id="save-strategies-btn">Save Strategies</button>
+              </div>
+            </div>
+
+            <div class="settings-card glass">
+              <h3><i data-lucide="wallet"></i> Capital & Risk</h3>
+              <div class="settings-form">
+                <div class="input-group">
+                  <label>Starting Capital (₹)</label>
+                  <input type="number" id="starting-capital" placeholder="100000" />
+                </div>
+                <div class="input-group">
+                  <label>Max Risk Per Trade (%)</label>
+                  <input type="number" id="max-risk" placeholder="1" step="0.1" />
+                </div>
+                <div class="input-group">
+                  <label>Daily Loss Limit (₹)</label>
+                  <input type="number" id="daily-loss-limit" placeholder="5000" />
+                </div>
+                <button class="btn-primary" id="save-capital-btn">Save Settings</button>
+              </div>
+            </div>
+
+            <div class="settings-card glass">
+              <h3><i data-lucide="database"></i> Data Management</h3>
+              <div class="settings-form">
+                <button class="btn-ghost full-width" id="backup-btn">
+                  <i data-lucide="download"></i> Export Full Backup (JSON)
+                </button>
+                <button class="btn-ghost full-width" id="restore-btn">
+                  <i data-lucide="upload"></i> Restore from Backup
+                </button>
+                <input type="file" id="restore-file" accept=".json" class="hidden" />
+                <div class="danger-zone">
+                  <p class="danger-label">Danger Zone</p>
+                  <button class="btn-danger" id="clear-data-btn">
+                    <i data-lucide="trash-2"></i> Clear All Data
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-card glass">
+              <h3><i data-lucide="link"></i> Supabase Configuration</h3>
+              <div class="settings-form">
+                <div class="input-group">
+                  <label>Supabase URL</label>
+                  <input type="text" id="supabase-url" placeholder="https://xxx.supabase.co" />
+                </div>
+                <div class="input-group">
+                  <label>Supabase Anon Key</label>
+                  <input type="text" id="supabase-key" placeholder="eyJ..." />
+                </div>
+                <button class="btn-primary" id="save-supabase-btn" style="width:100%;justify-content:center;">Connect &amp; Save</button>
+                <div class="supabase-status" id="supabase-status"></div>
+                <button class="btn-ghost full-width" id="sync-from-supabase-btn">
+                  <i data-lucide="download"></i> Pull Data from Cloud → This Device
+                </button>
+                <button class="btn-ghost full-width" id="push-to-supabase-btn">
+                  <i data-lucide="upload"></i> Push This Device → Cloud
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </div><!-- end pages-container -->
+    </main>
+  </div><!-- end app -->
+
+  <!-- ═══════════════════════════════════════════
+       ADD TRADE MODAL
+  ═══════════════════════════════════════════ -->
+  <div class="modal-overlay hidden" id="trade-modal-overlay">
+    <div class="modal glass" id="trade-modal">
+      <div class="modal-header">
+        <h2 id="modal-title">Add Trade</h2>
+        <button class="modal-close" id="modal-close-btn">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form id="trade-form" novalidate>
+          <input type="hidden" id="trade-id" />
+
+          <!-- Row: Date + Time + Index -->
+          <div class="form-row three-col">
+            <div class="form-group">
+              <label>Date *</label>
+              <input type="date" id="trade-date" required />
+            </div>
+            <div class="form-group">
+              <label>Time *</label>
+              <input type="time" id="trade-time" required />
+            </div>
+            <div class="form-group">
+              <label>Session</label>
+              <select id="trade-session">
+                <option value="Opening">Opening (9:15–11:00)</option>
+                <option value="Midday">Midday (11:00–2:00)</option>
+                <option value="Closing">Closing (2:00–3:30)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Index -->
+          <div class="form-group">
+            <label>Index *</label>
+            <div class="btn-toggle-group" id="index-group">
+              <button type="button" class="toggle-btn" data-value="NIFTY">Nifty</button>
+              <button type="button" class="toggle-btn" data-value="BANKNIFTY">BankNifty</button>
+              <button type="button" class="toggle-btn" data-value="SENSEX">Sensex</button>
+            </div>
+          </div>
+
+          <!-- Direction -->
+          <div class="form-group">
+            <label>Direction *</label>
+            <div class="btn-toggle-group" id="direction-group">
+              <button type="button" class="toggle-btn bull" data-value="BUY CE">BUY CE</button>
+              <button type="button" class="toggle-btn bull" data-value="BUY PE">BUY PE</button>
+              <button type="button" class="toggle-btn bear" data-value="SELL CE">SELL CE</button>
+              <button type="button" class="toggle-btn bear" data-value="SELL PE">SELL PE</button>
+            </div>
+          </div>
+
+          <!-- Strategy -->
+          <div class="form-group">
+            <label>Strategy *</label>
+            <div class="btn-toggle-group" id="strategy-group">
+              <!-- Populated from settings -->
+            </div>
+          </div>
+
+          <!-- Market Structure -->
+          <div class="form-group">
+            <label>Market Structure</label>
+            <div class="btn-toggle-group" id="market-structure-group">
+              <button type="button" class="toggle-btn bull" data-value="Bullish">Bullish</button>
+              <button type="button" class="toggle-btn neutral" data-value="Sideways">Sideways</button>
+              <button type="button" class="toggle-btn bear" data-value="Bearish">Bearish</button>
+            </div>
+          </div>
+
+          <!-- Prices Row -->
+          <div class="form-row four-col">
+            <div class="form-group">
+              <label>Entry *</label>
+              <input type="number" id="trade-entry" step="0.05" placeholder="0.00" required />
+            </div>
+            <div class="form-group">
+              <label>Exit</label>
+              <input type="number" id="trade-exit" step="0.05" placeholder="0.00" />
+            </div>
+            <div class="form-group">
+              <label>Stoploss</label>
+              <input type="number" id="trade-stoploss" step="0.05" placeholder="0.00" />
+            </div>
+            <div class="form-group">
+              <label>Target</label>
+              <input type="number" id="trade-target" step="0.05" placeholder="0.00" />
+            </div>
+          </div>
+
+          <!-- Trade Sizing Row -->
+          <div class="form-row three-col">
+            <div class="form-group">
+              <label>Quantity *</label>
+              <input type="number" id="trade-qty" placeholder="25" required />
+            </div>
+            <div class="form-group">
+              <label>Capital Used (₹)</label>
+              <input type="number" id="trade-capital" placeholder="0" />
+            </div>
+            <div class="form-group">
+              <label>Broker Charges (₹)</label>
+              <input type="number" id="trade-charges" step="0.01" placeholder="0" value="0" />
+            </div>
+          </div>
+
+          <!-- Calculated Row -->
+          <div class="form-row three-col calc-row">
+            <div class="form-group">
+              <label>Risk (₹) <span class="auto-badge">Auto</span></label>
+              <input type="number" id="trade-risk" readonly placeholder="0" />
+            </div>
+            <div class="form-group">
+              <label>Reward (₹) <span class="auto-badge">Auto</span></label>
+              <input type="number" id="trade-reward" readonly placeholder="0" />
+            </div>
+            <div class="form-group">
+              <label>Net P&L (₹) <span class="auto-badge">Auto</span></label>
+              <input type="number" id="trade-pnl" class="pnl-field" placeholder="0" />
+            </div>
+          </div>
+
+          <!-- RR + Holding -->
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label>RR <span class="auto-badge">Auto</span></label>
+              <input type="number" id="trade-rr" step="0.01" readonly placeholder="0.00" />
+            </div>
+            <div class="form-group">
+              <label>Holding Time</label>
+              <input type="text" id="trade-holding" placeholder="e.g. 15 min" />
+            </div>
+          </div>
+
+          <!-- Reason for Entry / Exit -->
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label>Reason for Entry</label>
+              <select id="trade-entry-reason">
+                <option value="">Select reason</option>
+                <option value="Gann Level Breakout">Gann Level Breakout</option>
+                <option value="Gann Rejection">Gann Rejection</option>
+                <option value="5m Midpoint Breakout">5m Midpoint Breakout</option>
+                <option value="5m Midpoint Rejection">5m Midpoint Rejection</option>
+                <option value="VWAP Bounce">VWAP Bounce</option>
+                <option value="EMA8 Crossover">EMA8 Crossover</option>
+                <option value="Volume Spike">Volume Spike</option>
+                <option value="OBV Confirmation">OBV Confirmation</option>
+                <option value="Price Action">Price Action</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Reason for Exit</label>
+              <select id="trade-exit-reason">
+                <option value="">Select reason</option>
+                <option value="Target Hit">Target Hit</option>
+                <option value="Stop Loss Hit">Stop Loss Hit</option>
+                <option value="Manual Exit">Manual Exit</option>
+                <option value="Time Exit">Time Exit</option>
+                <option value="Trailing SL">Trailing SL</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Psychology -->
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label>Emotion Before</label>
+              <select id="trade-emotion-before">
+                <option value="">Select emotion</option>
+                <option value="Calm">😌 Calm</option>
+                <option value="Confident">💪 Confident</option>
+                <option value="Anxious">😰 Anxious</option>
+                <option value="Excited">🔥 Excited</option>
+                <option value="Fearful">😨 Fearful</option>
+                <option value="Greedy">🤑 Greedy</option>
+                <option value="Neutral">😐 Neutral</option>
+                <option value="FOMO">😤 FOMO</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Emotion After</label>
+              <select id="trade-emotion-after">
+                <option value="">Select emotion</option>
+                <option value="Happy">😊 Happy</option>
+                <option value="Satisfied">✅ Satisfied</option>
+                <option value="Disappointed">😞 Disappointed</option>
+                <option value="Angry">😡 Angry</option>
+                <option value="Relieved">😮‍💨 Relieved</option>
+                <option value="Regretful">😔 Regretful</option>
+                <option value="Neutral">😐 Neutral</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Confidence Slider -->
+          <div class="form-group">
+            <label>Confidence Level: <span id="confidence-display">5</span>/10</label>
+            <input type="range" id="trade-confidence" min="1" max="10" value="5" class="slider" />
+            <div class="slider-labels">
+              <span>Low</span><span>Medium</span><span>High</span>
+            </div>
+          </div>
+
+          <!-- Mistake + Tags -->
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label>Mistake</label>
+              <select id="trade-mistake">
+                <option value="">No mistake</option>
+                <option value="FOMO Entry">FOMO Entry</option>
+                <option value="Early Exit">Early Exit</option>
+                <option value="Late Entry">Late Entry</option>
+                <option value="Moved SL">Moved SL</option>
+                <option value="Overtraded">Overtraded</option>
+                <option value="No SL">No SL</option>
+                <option value="Revenge Trade">Revenge Trade</option>
+                <option value="Sized Too Big">Sized Too Big</option>
+                <option value="Ignored Setup Rules">Ignored Setup Rules</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Tags</label>
+              <input type="text" id="trade-tags" placeholder="e.g. expiry, trend, reversal" />
+            </div>
+          </div>
+
+          <!-- Lesson -->
+          <div class="form-group">
+            <label>Lesson Learned</label>
+            <textarea id="trade-lesson" rows="2" placeholder="What did you learn from this trade?"></textarea>
+          </div>
+
+          <!-- Notes -->
+          <div class="form-group">
+            <label>Notes</label>
+            <textarea id="trade-notes" rows="3" placeholder="Additional trade notes..."></textarea>
+          </div>
+
+          <!-- Screenshots -->
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label>Setup Screenshot (Before Entry)</label>
+              <label class="file-upload-btn" for="setup-screenshot">
+                <i data-lucide="image-plus"></i>
+                <span id="setup-screenshot-name">Choose image</span>
+              </label>
+              <input type="file" id="setup-screenshot" accept="image/*" class="hidden" />
+              <div class="screenshot-preview" id="setup-preview"></div>
+            </div>
+            <div class="form-group">
+              <label>Exit Screenshot</label>
+              <label class="file-upload-btn" for="exit-screenshot">
+                <i data-lucide="image-plus"></i>
+                <span id="exit-screenshot-name">Choose image</span>
+              </label>
+              <input type="file" id="exit-screenshot" accept="image/*" class="hidden" />
+              <div class="screenshot-preview" id="exit-preview"></div>
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-ghost" id="cancel-trade-btn">Cancel</button>
+        <button class="btn-primary" id="save-trade-btn">
+          <i data-lucide="save"></i>
+          Save Trade
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       IMAGE LIGHTBOX
+  ═══════════════════════════════════════════ -->
+  <div class="lightbox hidden" id="lightbox">
+    <div class="lightbox-bg" id="lightbox-bg"></div>
+    <div class="lightbox-content">
+      <img src="" alt="Screenshot" id="lightbox-img" />
+      <button class="lightbox-close" id="lightbox-close"><i data-lucide="x"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       TOAST NOTIFICATIONS
+  ═══════════════════════════════════════════ -->
+  <div class="toast-container" id="toast-container"></div>
+
+   <!-- ═══════════════════════════════════════════
+       SCRIPTS
+  ═══════════════════════════════════════════ -->
+  <script src="js/supabase/database.js"></script>
+  <script src="js/supabase/config.js"></script>
+  <script src="js/utils/helpers.js"></script>
+  <script src="js/utils/analytics.js"></script>
+  <script src="js/charts/charts.js"></script>
+  <script src="js/components/toast.js"></script>
+  <script src="js/components/modal.js"></script>
+  <script src="js/components/calendar.js"></script>
+  <script src="js/components/notes.js"></script>
+  <script src="js/components/psychology.js"></script>
+  <script src="js/components/screenshots.js"></script>
+  <script src="js/components/ai-insights.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
+

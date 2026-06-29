@@ -1,0 +1,284 @@
+/* ══════════════════════════════════════════════
+   TRADEROS — LOGIN SCREEN
+══════════════════════════════════════════════ */
+
+.login-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-base);
+  z-index: 9999;
+  overflow: hidden;
+}
+
+/* ─── Animated Grid BG ─── */
+.login-bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(108,99,255,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(108,99,255,0.05) 1px, transparent 1px);
+  background-size: 50px 50px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+}
+
+/* ─── Ambient Orbs ─── */
+.login-orbs { position: absolute; inset: 0; pointer-events: none; }
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  animation: orbFloat 8s ease-in-out infinite;
+}
+
+.orb-1 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(108,99,255,0.25) 0%, transparent 70%);
+  top: -100px; left: -100px;
+  animation-delay: 0s;
+}
+
+.orb-2 {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(0,212,170,0.2) 0%, transparent 70%);
+  bottom: -50px; right: -50px;
+  animation-delay: -3s;
+}
+
+.orb-3 {
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(255,77,109,0.1) 0%, transparent 70%);
+  top: 50%; left: 50%;
+  animation-delay: -6s;
+}
+
+@keyframes orbFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  33% { transform: translateY(-30px) scale(1.05); }
+  66% { transform: translateY(20px) scale(0.95); }
+}
+
+/* ─── Login Card ─── */
+.login-card {
+  position: relative;
+  z-index: 1;
+  width: 400px;
+  max-width: calc(100vw - 32px);
+  padding: 40px;
+  border-radius: var(--radius-2xl);
+  animation: cardIn 600ms var(--ease-spring) both;
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(30px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ─── Logo ─── */
+.login-logo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 36px;
+}
+
+.logo-mark {
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 20px rgba(108,99,255,0.4));
+}
+
+.login-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.login-subtitle {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-top: 4px;
+}
+
+/* ─── Form ─── */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.input-label {
+  display: block;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--text-muted);
+  pointer-events: none;
+  width: 16px; height: 16px;
+}
+
+.passcode-input {
+  width: 100%;
+  padding: 14px 48px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  font-size: var(--text-md);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  outline: none;
+  transition: all var(--transition-base);
+}
+
+.passcode-input:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(108,99,255,0.15), 0 0 40px rgba(108,99,255,0.1);
+  background: var(--bg-card);
+}
+
+.toggle-visibility {
+  position: absolute;
+  right: 14px;
+  color: var(--text-muted);
+  transition: color var(--transition-fast);
+  display: flex;
+  align-items: center;
+}
+.toggle-visibility:hover { color: var(--text-secondary); }
+
+/* ─── Remember Me ─── */
+.remember-row {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  user-select: none;
+}
+
+.checkbox-label input { display: none; }
+
+.checkbox-custom {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1.5px solid var(--border-strong);
+  background: var(--bg-elevated);
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.checkbox-label input:checked + .checkbox-custom {
+  background: var(--grad-primary);
+  border-color: transparent;
+}
+
+.checkbox-label input:checked + .checkbox-custom::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='3 8 6 11 13 4'%3E%3C/polyline%3E%3C/svg%3E") no-repeat center;
+  background-size: 12px;
+}
+
+/* ─── Unlock Button ─── */
+.btn-unlock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 15px;
+  background: var(--grad-primary);
+  color: white;
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 700;
+  border-radius: var(--radius-lg);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  letter-spacing: 0.03em;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-unlock::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.btn-unlock:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(108,99,255,0.5);
+}
+.btn-unlock:hover::before { opacity: 1; }
+.btn-unlock:active { transform: translateY(0); }
+
+/* ─── Error ─── */
+.login-error {
+  color: var(--accent-red);
+  font-size: var(--text-sm);
+  text-align: center;
+  animation: shake 400ms ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+/* ─── Hint ─── */
+.login-hint {
+  margin-top: 20px;
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+.login-hint code {
+  background: var(--bg-elevated);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--accent-secondary);
+  font-family: monospace;
+}
+
+/* ─── Visibility control via JS .active toggle ─── */
+.login-screen:not(.active) {
+  display: none;
+}
